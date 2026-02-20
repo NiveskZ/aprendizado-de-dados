@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS guia_tur
+CHARSET utf8mb4;
+
+CREATE TABLE IF NOT EXISTS pais(
+	ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL,
+    continente ENUM('Ásia','América','África', 'EUROPA'),
+    codigo CHAR(3) NOT NULL
+);
