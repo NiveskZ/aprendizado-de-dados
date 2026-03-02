@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS produto(
     estoque INT DEFAULT 0
 );
 
+ALTER TABLE produto MODIFY preco DECIMAL(8,2) NOT NULL AFTER nome;
+ALTER TABLE produto ADD marca VARCHAR(50) NOT NULL;
+
+DESCRIBE produto;
+
 INSERT INTO produto
 VALUES (0, 'boneca', 'brinquedo', 39.90, 10);
 

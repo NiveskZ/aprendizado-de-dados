@@ -44,6 +44,19 @@ VALUES
     
 SELECT * FROM pais;
 
+ALTER TABLE pais ADD lingua_oficial VARCHAR(50) NOT NULL;
+
+UPDATE pais
+SET lingua_oficial = 'Brasileiro'
+WHERE ID = 1;
+
+UPDATE pais
+SET lingua_oficial = 'Hindi' WHERE ID = 2;
+UPDATE pais
+SET lingua_oficial = 'Mandarim' WHERE ID = 3;
+UPDATE pais
+SET lingua_oficial = 'Japonês' Where ID = 4;
+
 INSERT INTO estado (nome, sigla)
 VALUES
 	('Maranhão','MA'),
@@ -70,4 +83,13 @@ VALUES
     ('Torre Eiffel', 'Atrativo'),
     ('Fogo de Chão', 'Serviço');
 
-SELECT * FROM ponto_tur;
+SELECT * FROM pontos_tur;
+
+ALTER TABLE ponto_tur DROP COLUMN populacao;
+
+ALTER TABLE ponto_tur 
+MODIFY tipo ENUM('Atrativo', 'Serviço', 'Equipamento', 'Infraestrutura', 'Instituição', 'Organização', 'Patrimônio Público');
+
+ALTER TABLE ponto_tur RENAME pontos_tur;
+
+SELECT * FROM pais
