@@ -92,4 +92,36 @@ MODIFY tipo ENUM('Atrativo', 'Serviço', 'Equipamento', 'Infraestrutura', 'Insti
 
 ALTER TABLE ponto_tur RENAME pontos_tur;
 
-SELECT * FROM pais
+SELECT * FROM pais;
+
+-- India possui mais de uma lingua oficial, outros paises tambem possui outras linguas nao oficias, precisamos resolver, criando outra tabela
+CREATE TABLE IF NOT EXISTS linguagemPais (
+	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    codigoPais INT(11),
+    linguagem VARCHAR(30) NOT NULL DEFAULT '',
+    oficial ENUM('Sim','Não') NOT NULL DEFAULT 'Não'
+);
+
+ALTER TABLE pais DROP COLUMN lingua_oficial;
+
+ALTER TABLE linguagemPais
+ADD CONSTRAINT FK_linguagemPais
+FOREIGN KEY (codigoPais) REFERENCES pais(id);
+
+CREATE TABLE IF NOT EXISTS ponto_tur (
+	id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL DEFAULT '',
+    tipo ENUM('Atrativo', 'Serviço', 'Equipamento', 'Infraestrutura', 'Instituição','Organização','Patrimônio Público'),
+    publicado ENUM('Não','Sim') NOT NULL DEFAULT 'Não'
+);
+
+ALTER TABLE ponto_tur ADD coordenada GEOMETRY;
+
+DROP TABLE IF EXISTS coordenada;
+
+ALTER TABLE pais
+ADD COLUMN nota_turistica INTEGER CHECK (nota_turistica BETWEEN 0 AND 10);
+
+ALTER TABLE cidade
+ADD COLUMN melhores_restaurantes TEXT;
+

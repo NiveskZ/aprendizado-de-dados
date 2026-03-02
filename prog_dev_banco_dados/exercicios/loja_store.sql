@@ -27,3 +27,15 @@ WHERE cod = 3;
 
 SELECT * FROM produto;
 
+CREATE TABLE IF NOT EXISTS pedido(
+	pedido_id INT PRIMARY KEY AUTO_INCREMENT,
+    cod_produto INT NOT NULL,
+    quantidade INT NOT NULL,
+    data_pedido DATE DEFAULT (CURRENT_DATE),
+    FOREIGN KEY (cod_produto) REFERENCES produto(cod)
+);
+
+INSERT INTO pedido(cod_produto,quantidade)
+VALUES(3,5);
+
+SELECT * FROM pedido;
