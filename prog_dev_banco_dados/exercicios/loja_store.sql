@@ -182,4 +182,33 @@ EXPLAIN SELECT c.nome, p.cod_produto
 FROM clientes c
 USE INDEX (idx_id_cliente)
 JOIN pedido p
-ON c.id_cliente = p.id_cliente
+ON c.id_cliente = p.id_cliente;
+
+CREATE TABLE vendas (
+	data DATE,
+    valor DECIMAL(10,2)
+);
+
+INSERT INTO vendas (data, valor) 
+VALUES
+	('2024-01-01', 100.50),
+    ('2024-01-02', 110.75),
+    ('2024-01-03', 105.20),
+    ('2024-01-04', 115.30),
+    ('2024-01-05', 120.40),
+    ('2024-01-06', 125.60),
+    ('2024-01-07', 130.70),
+    ('2024-01-08', 135.90),
+    ('2024-01-09', 140.20),
+    ('2024-01-10', 145.50);
+    
+SELECT
+	data,
+    valor,
+    AVG(valor) OVER (
+			ORDER BY data ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+        ) AS media_movel
+
+FROM vendas
+ORDER BY data;
+    
