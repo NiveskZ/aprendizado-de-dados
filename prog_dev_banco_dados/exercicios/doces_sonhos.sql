@@ -71,14 +71,24 @@ VALUES
 
 SELECT * FROM ingredientes;
 
+SET @id_brigadeiro = (SELECT id_produto from produtos WHERE nome = 'Brigadeiro');
+SET @id_beijinho = (SELECT id_produto from produtos WHERE nome = 'Beijinho');
+SET @id_pudim = (SELECT id_produto from produtos WHERE nome = 'Pudim');
+
+SET @id_chocolate = (SELECT id_ingrediente from ingredientes WHERE nome = 'Chocolate');
+SET @id_condensado = (SELECT id_ingrediente from ingredientes WHERE nome = 'Leite Condensado');
+SET @id_coco_ralado = (SELECT id_ingrediente from ingredientes WHERE nome = 'Coco ralado');
+SET @id_leite = (SELECT id_ingrediente from ingredientes WHERE nome = 'Leite');
+SET @id_ovos = (SELECT id_ingrediente from ingredientes WHERE nome = 'Ovos');
+
 INSERT INTO composicao (id_produto, id_ingrediente, quantidade_usada)
 VALUES
-	(1, 1, 100),
-	(1, 2, 395),
-	(2, 2, 395),
-	(2, 3, 50),
-	(3, 2, 395),
-	(3, 4, 500),
-	(3, 5, 3);
+	(id_brigadeiro, id_chocolate, 100),
+	(id_brigadeiro, id_condensado, 395),
+	(id_beijinho, id_condensado, 395),
+	(id_beijinho, id_coco_ralado, 50),
+	(id_pudim, id_condensado, 395),
+	(id_pudim, id_leite, 500),
+	(id_pudim, id_ovos, 3);
     
 SELECT * FROM composicao;
