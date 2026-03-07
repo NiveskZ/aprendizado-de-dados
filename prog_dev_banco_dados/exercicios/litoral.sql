@@ -127,3 +127,31 @@ CALL proc_desc(2);
 CALL proc_desc(3);
 
 SELECT * FROM vendas;
+
+
+-- Como fazer Controle de acesso 
+
+CREATE USER 'usuario1'@'localhost' IDENTIFIED BY 'senha1';
+
+CREATE USER 'usuario2'@'localhost' IDENTIFIED BY 'senha2';
+
+CREATE USER 'usuario3'@'localhost' IDENTIFIED BY 'senha3';
+
+CREATE USER 'usuario4'@'localhost' IDENTIFIED BY 'senha4';
+
+CREATE USER 'usuario5'@'localhost' IDENTIFIED BY 'senha5';
+
+CREATE ROLE grupo_a_role;
+
+CREATE ROLE grupo_b_role;
+
+GRANT grupo_a_role TO 'usuario1'@'localhost', 'usuario2'@'localhost';
+
+GRANT grupo_b_role TO 'usuario3'@'localhost', 'usuario4'@'localhost', 'usuario5'@'localhost';
+
+GRANT SELECT ON litoral.vendas TO grupo_a_role;
+
+GRANT SELECT, INSERT, DELETE, UPDATE ON litoral.vendas TO grupo_b_role;
+
+-- OU
+-- GRANT ALL ON litoral.vendas TO grupo_b_role;
