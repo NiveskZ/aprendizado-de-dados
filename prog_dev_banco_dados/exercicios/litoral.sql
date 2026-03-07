@@ -76,3 +76,54 @@ SELECT * FROM destino;
 COMMIT;
 -- Estabelecer um novo ponto de restauração, pois o anterior será eliminado após a gravação das alterações.
 SAVEPOINT point2;
+
+CREATE TABLE vendas ( 
+
+    numero INT PRIMARY KEY AUTO_INCREMENT, 
+
+    destinoId INT NOT NULL, 
+
+    embarque DATE NOT NULL, 
+
+    qtd INT NOT NULL, 
+
+    FOREIGN KEY (destinoId) REFERENCES destino(id) 
+
+); 
+
+ALTER TABLE destino ADD COLUMN valor DECIMAL(5,2);
+
+UPDATE destino SET Valor = 100 WHERE id = 1;
+UPDATE destino SET Valor = 120 WHERE id = 2;
+UPDATE destino SET Valor = 80 WHERE id = 3;
+UPDATE destino SET Valor = 90 WHERE id = 4;
+UPDATE destino SET Valor = 100 WHERE id = 5;
+UPDATE destino SET Valor = 150 WHERE id = 6;
+UPDATE destino SET Valor = 120 WHERE id = 7;
+UPDATE destino SET Valor = 180 WHERE id = 8;
+
+
+CREATE FUNCTION fn_desconto(valor DECIMAL(5,2), qtd INT)
+RETURNS DECIMAL(5,2)
+DETERMINISTIC
+RETURN((valor*qtd)*0.7);
+
+CREATE PROCEDURE proc_desc(VAR_VendasNumero INT)
+SELECT (fn_desconto(d.valor, v.qtd)) AS "Valor com desconto", d.nome AS "Destino", v.qtd AS "Passagens", v.embarque
+FROM vendas v
+INNER JOIN destino d
+ON v.destinoId = d.id
+WHERE Numero = VAR_VendasNumero;
+
+INSERT INTO vendas
+VALUES
+	(0,1,"2024-02-03",3),
+    (0,7,"2024-02-03",2),
+    (0,5,"2024-02-03",1);
+
+
+CALL proc_desc(1);
+CALL proc_desc(2);
+CALL proc_desc(3);
+
+SELECT * FROM vendas;
