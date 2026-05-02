@@ -155,3 +155,6 @@ GRANT SELECT, INSERT, DELETE, UPDATE ON litoral.vendas TO grupo_b_role;
 
 -- OU
 -- GRANT ALL ON litoral.vendas TO grupo_b_role;
+-- após conceder ou revogar privilégios usando o comando GRANT ou REVOKE no MySQL, geralmente é uma prática recomendada usar o seguinte comando:
+REVOKE SELECT ON litoral.vendas FROM 'usuario5'@'localhost';
+FLUSH PRIVILEGES;
