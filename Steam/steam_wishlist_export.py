@@ -32,7 +32,7 @@ without needing a manual import step.
 import csv
 import math
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -40,7 +40,7 @@ import requests
 # -- config
 
 STEAM_ID   = ""        # 64-bit Steam ID — leave empty if using CUSTOM_URL
-CUSTOM_URL = ""  # Your Steam profile name (the part after /id/ in your URL)
+CUSTOM_URL = "Nivesk"  # Your Steam profile name (the part after /id/ in your URL)
 
 COUNTRY_CODE = "BR"              # Controls currency — BR returns prices in BRL
 OUTPUT_FILE  = "steam_wishlist.csv"
@@ -58,6 +58,14 @@ HEADERS = {
         "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     ),
     "Accept-Language": "pt-BR,pt;q=0.9",
+}
+
+# Age-restricted games return success:false without these cookies.
+# They bypass the age-gate without requiring a Steam login.
+COOKIES = {
+    "birthtime":       "0",
+    "lastagecheckage": "1-January-1990",
+    "mature_content":  "1",
 }
 
 
@@ -139,20 +147,31 @@ def fetch_app_details(app_id: int) -> dict:
     """
     Fetches name, price, release date and other metadata from the Steam Store API.
 
-    The cc (country code) parameter sets the currency for prices.
-    Returns an empty dict if the request fails or the app is not found.
+    Uses l=english so dates come back in a parseable format ("21 Aug, 2019").
+    With l=portuguese Steam returns localised month names ("21 ago. 2019")
+    that the date parser below does not handle.
+
+    Retries up to 3 times with increasing delays on timeout before giving up.
     """
     url = (
         f"https://store.steampowered.com/api/appdetails"
-        f"?appids={app_id}&cc={COUNTRY_CODE}&l=portuguese"
+        f"?appids={app_id}&cc={COUNTRY_CODE}&l=english"
     )
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=10)
-        data = r.json()
-        if data.get(str(app_id), {}).get("success"):
-            return data[str(app_id)]["data"]
-    except Exception as e:
-        print(f"    Warning: could not fetch details for {app_id}: {e}")
+    for attempt in range(3):
+        try:
+            r = requests.get(url, headers=HEADERS, cookies=COOKIES, timeout=15)
+            data = r.json()
+            if data.get(str(app_id), {}).get("success"):
+                return data[str(app_id)]["data"]
+            return {}
+        except requests.exceptions.Timeout:
+            wait = 5 * (attempt + 1)  # 5s, 10s, 15s
+            print(f"    Timeout (attempt {attempt + 1}/3) — retrying in {wait}s...")
+            time.sleep(wait)
+        except Exception as e:
+            print(f"    Warning: could not fetch details for {app_id}: {e}")
+            return {}
+    print(f"    Giving up on AppID {app_id} after 3 timeouts.")
     return {}
 
 
@@ -215,7 +234,7 @@ def fetch_rating(app_id: int) -> str:
         f"?json=1&language=all&purchase_type=all&num_per_page=0"
     )
     try:
-        r = requests.get(url, headers=HEADERS, timeout=10)
+        r = requests.get(url, headers=HEADERS, cookies=COOKIES, timeout=10)
         summary  = r.json().get("query_summary", {})
         positive = summary.get("total_positive", 0)
         total    = summary.get("total_reviews", 0)
@@ -238,7 +257,7 @@ def fetch_rating(app_id: int) -> str:
 def timestamp_to_date(ts) -> str:
     """Converts a Unix timestamp (seconds since 1970) to DD/MM/YYYY."""
     try:
-        return datetime.utcfromtimestamp(int(ts)).strftime("%d/%m/%Y")
+        return datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%d/%m/%Y")
     except Exception:
         return ""
 
