@@ -5,22 +5,14 @@ Steam Wishlist Exporter
 Exporta todos os jogos da sua wishlist da Steam para um CSV.
 
 Como usar:
-  1. Instale as dependências: pip install requests
-  2. Descubra seu Steam ID (64-bit): https://www.steamidfinder.com/
-     OU use sua URL customizada: https://steamcommunity.com/id/SEU_NOME
+  1. Crie o virtualenv e instale as dependências:
+       python -m venv venv
+       source venv/bin/activate
+       pip install -r requirements.txt
+  2. Copie .env.example para .env e preencha STEAM_ID ou STEAM_CUSTOM_URL
   3. Certifique-se de que sua wishlist está PÚBLICA:
-     Steam > Perfil > Editar Perfil > Configurações de Privacidade > Detalhes do Jogo = Público
+       Steam > Perfil > Editar Perfil > Configurações de Privacidade > Detalhes do Jogo = Público
   4. Execute: python steam_wishlist_export.py
-
------------------------
-Exports your Steam wishlist to a CSV file with pricing and rating data.
-
-Usage:
-  1. pip install requests
-  2. Set CUSTOM_URL to your Steam profile name (or fill STEAM_ID directly)
-  3. Make sure your wishlist is set to Public on Steam:
-     Profile > Edit Profile > Privacy Settings > Game Details = Public
-  4. python steam_wishlist_export.py
 
 Output — steam_wishlist.csv:
   AppID | Nome | Preco | Preco Promo | Data Adicionado | Data Lancamento | Rating (%)
@@ -31,21 +23,25 @@ without needing a manual import step.
 
 import csv
 import math
+import os
 import time
 from datetime import datetime, timezone
 
 import requests
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 # -- config
 
-STEAM_ID   = ""        # 64-bit Steam ID — leave empty if using CUSTOM_URL
-CUSTOM_URL = "Nivesk"  # Your Steam profile name (the part after /id/ in your URL)
+STEAM_ID   = os.getenv("STEAM_ID", "")
+CUSTOM_URL = os.getenv("STEAM_CUSTOM_URL", "")
 
-COUNTRY_CODE = "BR"              # Controls currency — BR returns prices in BRL
+COUNTRY_CODE = "BR"
 OUTPUT_FILE  = "steam_wishlist.csv"
-DELAY        = 1.2               # Seconds to wait between API calls. Steam rate-limits
-                                 # aggressive scrapers, so don't set this below 1.0.
+DELAY        = 1.2
 
 
 # -- http headers
@@ -71,8 +67,6 @@ COOKIES = {
 
 # -- csv column order
 
-# Defines the column order in the output file.
-# Matches the SteamFamily table in the data model (Jogos | SteamFamily | Avaliacoes).
 CSV_FIELDS = [
     "AppID",
     "Nome",
@@ -97,7 +91,7 @@ def resolve_steam_id(steam_id: str, custom_url: str) -> str:
     if steam_id:
         return steam_id
     if not custom_url:
-        raise ValueError("Set either STEAM_ID or CUSTOM_URL at the top of the script.")
+        raise ValueError("Set either STEAM_ID or STEAM_CUSTOM_URL in your .env file.")
 
     print(f"Resolving Steam ID for: {custom_url}...")
     r = requests.get(
@@ -165,7 +159,7 @@ def fetch_app_details(app_id: int) -> dict:
                 return data[str(app_id)]["data"]
             return {}
         except requests.exceptions.Timeout:
-            wait = 5 * (attempt + 1)  # 5s, 10s, 15s
+            wait = 5 * (attempt + 1)
             print(f"    Timeout (attempt {attempt + 1}/3) — retrying in {wait}s...")
             time.sleep(wait)
         except Exception as e:
@@ -187,12 +181,12 @@ def parse_price(price_overview: dict) -> tuple[str, str]:
     if not price_overview:
         return ("", "")
 
-    initial  = price_overview.get("initial", 0) / 100   # original price in cents → reais
-    final    = price_overview.get("final", 0) / 100     # discounted price
+    initial  = price_overview.get("initial", 0) / 100
+    final    = price_overview.get("final", 0) / 100
     discount = price_overview.get("discount_percent", 0)
 
     preco       = f"{initial:.2f}" if initial else "0.00"
-    preco_promo = f"{final:.2f}" if discount > 0 else ""  # only set when there's an active discount
+    preco_promo = f"{final:.2f}" if discount > 0 else ""
     return (preco, preco_promo)
 
 
@@ -213,7 +207,7 @@ def parse_release_date(details: dict) -> str:
             return datetime.strptime(date_str, fmt).strftime("%d/%m/%Y")
         except ValueError:
             continue
-    return date_str  # fallback: return whatever Steam sent
+    return date_str
 
 
 # -- rating
@@ -281,14 +275,14 @@ def main():
         date_added = timestamp_to_date(item.get("date_added", ""))
 
         details = fetch_app_details(app_id)
-        time.sleep(DELAY)  # wait between calls to avoid hitting Steam's rate limit
+        time.sleep(DELAY)
 
         rating = fetch_rating(app_id)
         time.sleep(DELAY * 0.5)
 
-        nome            = details.get("name", f"AppID {app_id}")
+        nome               = details.get("name", f"AppID {app_id}")
         preco, preco_promo = parse_price(details.get("price_overview"))
-        data_lancamento = parse_release_date(details)
+        data_lancamento    = parse_release_date(details)
 
         print(f"  [{i:>3}/{total}] {nome}")
 
@@ -302,8 +296,6 @@ def main():
             "Rating (%)":      rating,
         })
 
-    # utf-8-sig adds a BOM marker that tells Excel this is UTF-8,
-    # preventing accented characters from showing up as garbage.
     with open(OUTPUT_FILE, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()

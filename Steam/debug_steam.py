@@ -2,9 +2,15 @@
 Debug: mostra exatamente o que a Steam retorna para sua wishlist.
 Execute: python debug_steam.py
 """
-import requests
+import os
 
-STEAM_ID = "76561198185965385"
+import requests
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+STEAM_ID = os.getenv("STEAM_ID", "")
 
 HEADERS = {
     "User-Agent": (
@@ -15,11 +21,8 @@ HEADERS = {
 }
 
 urls = [
-    # Endpoint paginado antigo
     f"https://store.steampowered.com/wishlist/profiles/{STEAM_ID}/wishlistdata/?p=0",
-    # Endpoint alternativo sem paginação
     f"https://store.steampowered.com/wishlist/profiles/{STEAM_ID}/wishlistdata/",
-    # Endpoint da API pública
     f"https://api.steampowered.com/IWishlistService/GetWishlist/v1/?steamid={STEAM_ID}",
 ]
 
