@@ -1,0 +1,32 @@
+# Core
+python-dotenv>=1.0.1
+
+# LangChain
+langchain>=0.3.0
+langchain-core>=0.3.0
+langchain-text-splitters>=0.3.0
+langgraph>=0.2.0
+
+# LLM
+langchain-google-genai>=2.0.0
+
+# Embeddings
+langchain-huggingface>=0.1.0
+sentence-transformers>=3.0.0
+transformers>=4.45.0
+torch>=2.3.0
+
+# Vector DB
+langchain-chroma>=0.1.0
+chromadb>=0.5.0
+
+# SQL
+sqlalchemy>=2.0.0
+pymysql>=1.1.1
+
+# Discord
+discord.py>=2.4.0
+
+# Utilities
+pydantic>=2.8.0
+numpy>=2.0.0
