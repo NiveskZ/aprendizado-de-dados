@@ -138,15 +138,7 @@ df['Education'] = df['Education'].map({1: 0, 2: 1, 3: 1, 4: 1})
 df['Education'].value_counts()
 
 # %% [markdown]
-# ## 6. Validar contra a referência do curso
-
-# %%
-referencia = pd.read_csv('df_preprocessed.csv')
-print('Mesmo shape:', df.shape == referencia.shape)
-print('Mesmo conteúdo:', df.equals(referencia[df.columns]))
-
-# %% [markdown]
-# ## 7. Exportar
+# ## 6. Exportar
 
 # %%
 df_preprocessado = df.copy()

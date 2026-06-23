@@ -1,14 +1,8 @@
 # %% [markdown]
-# # Absenteísmo — Fase 2: Regressão Logística
+# # Fase 2: Regressão Logística
 #
 # **Objetivo:** construir um modelo que prevê se um colaborador terá absenteísmo
 # *excessivo* (mais horas do que a mediana).
-#
-# **Entrada:** `df_preprocessado.csv`
-# **Saídas:** arquivos `model` e `scaler` em pickle (usados pela Fase 3)
-#
-# Notebook separado por decisão de projeto — modelagem é uma responsabilidade
-# distinta do pré-processamento.
 
 # %% [markdown]
 # ## 0. Imports e carregamento
@@ -25,9 +19,8 @@ data_preprocessada.head()
 # ## 1. Criar a variável-alvo
 #
 # O modelo precisa de uma categoria, não de um número de horas. Dividimos pela **mediana**
-# para que as duas classes fiquem aproximadamente balanceadas — um alvo balanceado é o
-# que torna a acurácia uma métrica confiável aqui. (A Fase 1 confirmou que a distribuição
-# das horas é não normal, por isso a mediana, e não a média, é o ponto de corte correto.)
+# para que as duas classes fiquem aproximadamente balanceadas. (A Fase 1 confirmou que a distribuição
+# das horas é não normal, por isso a mediana, e não a média.)
 
 # %%
 data_preprocessada['Absenteeism Time in Hours'].median()
@@ -107,7 +100,7 @@ reg.score(x_treino, y_treino)
 # ## 6. Coeficientes e razão de chances (odds ratio)
 #
 # A razão de chances = exp(coeficiente). Um valor > 1 aumenta as chances de absenteísmo
-# excessivo; < 1 diminui. Esta tabela é o entregável real para o negócio — informa ao
+# excessivo; < 1 diminui. Esta tabela informa ao
 # RH *quais fatores importam e em que proporção*.
 
 # %%
@@ -122,7 +115,7 @@ tabela_resumo.sort_values('Odds_ratio', ascending=False)
 
 # %% [markdown]
 # **Leitura do resultado:** os grupos de razão dominam. `Reason_3` (lesões/causas externas)
-# e `Reason_1` (doenças) elevam mais as chances — intuitivo, pois são ausências sérias e
+# e `Reason_1` (doenças) elevam mais as chances, pois são ausências sérias e
 # não planejadas. Despesa com transporte e número de filhos empurram as chances levemente
 # para cima. Idade, educação e pets as reduzem levemente.
 
@@ -143,7 +136,7 @@ auc = metrics.roc_auc_score(y_teste, reg.predict_proba(x_teste)[:, 1])
 print(f'ROC-AUC: {auc:.4f}')
 
 # %%
-# probabilidades para a classe 1 — alimentam a análise no Tableau depois
+# probabilidades para a classe 1
 probabilidades_previstas = reg.predict_proba(x_teste)
 probabilidades_previstas[:, 1][:10]
 
