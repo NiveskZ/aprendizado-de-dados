@@ -19,7 +19,7 @@ async def responder(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     resposta = requests.post(
         FLOWISE_URL,
-        json={"question": mensagem, "overrideConfig": {"sessionId": session_id}},
+        json={"question": mensagem,"streaming": False, "overrideConfig": {"sessionId": session_id}},
         timeout=30
     )
     await update.message.reply_text(resposta.json().get("text", "Erro ao processar."))
